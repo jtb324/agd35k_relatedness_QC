@@ -1,5 +1,6 @@
 # Ignore anything related to cromwell
 cromwell*
 
-# Ignore test JSON inputs for the widdle scripts
+# Ignore testinputs for the widdle scripts
+test/
 *.json
