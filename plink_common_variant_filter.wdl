@@ -173,6 +173,7 @@ task MoveOrCopyFourFiles {
 
         Boolean is_move_file = false
 
+        Int memory = 2
         String? project_id
         String target_gcp_folder
     }
@@ -198,7 +199,7 @@ task MoveOrCopyFourFiles {
         docker: "google/cloud-sdk"
         preemptible: 1
         disks: "local-disk 10 HDD"
-        memory: "2 GiB"
+        memory: memory + "GiB"
     }
     output {
         String output_file1 = new_file1
