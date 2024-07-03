@@ -107,7 +107,7 @@ task PlinkFilter {
     runtime {
         docker: docker
         memory:  memory_gb + "GiB"
-        disks: "local-disk " + disk_size + " HDD"
+        disks: "local-disk " + disk_size + " SSD"
     }
 
     output {
@@ -147,7 +147,7 @@ task calculateExcessHeterozygosity {
     runtime {
         docker: docker
         memory:  memory_gb + "GiB"
-        disks: "local-disk " + disk_size + " HDD"
+        disks: "local-disk " + disk_size + " SSD"
     }
     output {
         File output_het_file=outputHetFile
