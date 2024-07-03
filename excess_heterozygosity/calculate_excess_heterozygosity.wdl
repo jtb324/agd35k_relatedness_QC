@@ -97,7 +97,7 @@ task PlinkFilter {
         --fam ~{sourceFam} \
         --maf ~{maf} \
         --snps-only \
-        --geno ~{variant_missingness}
+        --geno ~{variant_missingness} \
         --set-all-var-ids "chr@:#:\$r:\$a" \
         --new-id-max-allele-len 1000 \
         --make-bed \

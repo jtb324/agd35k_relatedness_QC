@@ -49,14 +49,18 @@ workflow RunsOfHomozygosity {
             sourceBed=Filter.output_bed,
             sourceBim=Filter.output_bim,
             sourceFam=Filter.output_fam,
-            outputPrefix=outputPrefix
+            outputPrefix=outputPrefix,
+            chromosome=chromosome
         }
-    } call GcpUtils.MoveOrCopyFileArray {
-        input:
-        source_files=DetermineHomozygosityRuns.plinkOutput
+        call GcpUtils.MoveOrCopyThreeFiles {
+            input:
+            source_file1=DetermineHomozygosityRuns.outputHom,
+            source_file2=DetermineHomozygosityRuns.outputHomInd,
+            source_file3=DetermineHomozygosityRuns.outputHomSummary,
+            target_gcp_folder=target_gcp_folder
+        }
     }
 }
-
 task DetermineHomozygosityRuns {
     input {
         File sourceBed
@@ -68,7 +72,10 @@ task DetermineHomozygosityRuns {
         String docker = "hkim298/plink_1.9_2.0:20230116_20230707"
     }
 
-    String outputFileName = "${outputPrefix}_${chromosome}.homozyg"
+    String homFileName = "${outputPrefix}_${chromosome}.hom"
+    String indFileName = "${outputPrefix}_${chromosome}.hom.indiv"
+    String summaryFileName = "${outputPrefix}_${chromosome}.hom.summary"
+
     String chrOutputPrefix = "${outputPrefix}_${chromosome}"
 
     # This line allows us to dynamically allocate memory at runtime so we don't hit an out of memory error
@@ -90,6 +97,8 @@ task DetermineHomozygosityRuns {
     }
 
     output {
-        String plinkOutput = outputFileName
+        File outputHom = homFileName
+        File outputHomInd = indFileName
+        File outputHomSummary = summaryFileName
     }
 }
