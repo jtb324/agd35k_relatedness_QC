@@ -1,0 +1,46 @@
+version 1.0
+
+import "https://raw.githubusercontent.com/jtb324/agd35k_relatedness_QC/main/plink_common_variant_filter.wdl" as plink_filter_utils
+import "https://raw.githubusercontent.com/shengqh/warp/develop/tasks/vumc_biostatistics/GcpUtils.wdl" as GcpUtils
+
+workflow RunsOfHomozygosity {
+    input  {
+        # We first need to provide arrays of the bed/bim/fam files since we are using plink1.9 formatted files
+        Array[File] source_bed_files 
+        Array[File] source_bim_files
+        Array[File] source_fam_files
+
+        Float maf
+        Float variant_missingness
+
+        String docker = "hkim298/plink_1.9_2.0:20230116_20230707"
+        String outputPrefix = "test"
+
+        Array[String] chroms
+
+        String? project_id
+        # We have to specify an output bucket if we want to store the output in a folder
+        String target_gcp_folder
+    }
+
+    scatter (indx in range(length(chroms))) {
+
+        String chromosome = chroms[indx]
+
+        File bed_file = source_bed_files[indx]
+        File bim_file = source_bim_files[indx]
+        File fam_file = source_fam_files[indx]
+
+        call PlinkFilter {
+            input: 
+            sourceBed=bed_file,
+            sourceBim=bim_file,
+            sourceFam=fam_file,
+            filteredOutputPrefix="common_variant_filter", 
+            maf=maf, 
+            variant_missingness=variant_missingness,
+            chromosome=chromosome, 
+            docker=docker,
+        }
+    }
+}
