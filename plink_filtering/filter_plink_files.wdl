@@ -44,9 +44,9 @@ task PlinkFilterandSubset {
     }
 
     output {
-        File output_bed = outputBed
-        File output_bim = outputBim
-        File output_fam = outputFam
+        File subset_bed = outputBed
+        File subset_bim = outputBim
+        File subset_fam = outputFam
     }
 }
 
@@ -91,9 +91,9 @@ task PlinkFrequencyFilter {
     }
 
     output {
-        File output_bed = outputBed
-        File output_bim = outputBim
-        File output_fam = outputFam
+        File freq_filtered_bed = outputBed
+        File freq_filtered_bim = outputBim
+        File freq_filtered_fam = outputFam
     }
 }
 

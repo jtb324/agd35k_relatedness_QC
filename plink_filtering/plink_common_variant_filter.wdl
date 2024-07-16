@@ -34,7 +34,7 @@ workflow commonVariantFilter {
         File bim_file = source_bim_files[indx]
         File fam_file = source_fam_files[indx]
 
-        if (defined(sample_file)) {
+        if (defined(sampleFile)) {
             call plink_filter.PlinkFilterandSubset as FilteredSubset {
                 input: 
                     sourceBed=bed_file,
@@ -49,16 +49,16 @@ workflow commonVariantFilter {
 
             call plink_filter.PlinkVarMissingnessFilter as PlinkMissingness {
                 input:
-                    sourceBed=FilteredSubset.outputBed,
-                    sourceBim=FilteredSubset.outputBim,
-                    sourceFam=FilteredSubset.outputFam,
+                    sourceBed=FilteredSubset.subset_bed,
+                    sourceBim=FilteredSubset.subset_bim,
+                    sourceFam=FilteredSubset.subset_fam,
                     varMissingness=0.1,
                     chromosome=chromosome,
                     docker=docker
             }
         }
 
-        if (!defined(sample_file)){
+        if (!defined(sampleFile)){
             call plink_filter.PlinkFrequencyFilter as FrequencyFiltered {
                 input: 
                     sourceBed=bed_file,
@@ -73,9 +73,9 @@ workflow commonVariantFilter {
 
             call plink_filter.PlinkVarMissingnessFilter as PlinkMissingness {
                 input:
-                    sourceBed=FrequencyFiltered.outputBed,
-                    sourceBim=FrequencyFiltered.outputBim,
-                    sourceFam=FrequencyFiltered.outputFam,
+                    sourceBed=FrequencyFiltered.freq_filtered_bed,
+                    sourceBim=FrequencyFiltered.freq_filtered_bim,
+                    sourceFam=FrequencyFiltered.freq_filtered_fam,
                     varMissingness=0.1,
                     chromosome=chromosome,
                     docker=docker
