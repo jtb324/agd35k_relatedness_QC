@@ -40,21 +40,11 @@ workflow commonVariantFilter {
                     sourceBed=bed_file,
                     sourceBim=bim_file,
                     sourceFam=fam_file,
-                    keepFile=sampleFile, 
+                    keepFile=select_first([sampleFile]),
                     outputPrefix="common_variant_filter", 
                     maf=maf, 
                     chromosome=chromosome, 
                     docker=docker,
-            }
-
-            call plink_filter.PlinkVarMissingnessFilter as PlinkMissingness {
-                input:
-                    sourceBed=FilteredSubset.subset_bed,
-                    sourceBim=FilteredSubset.subset_bim,
-                    sourceFam=FilteredSubset.subset_fam,
-                    varMissingness=0.1,
-                    chromosome=chromosome,
-                    docker=docker
             }
         }
 
@@ -64,23 +54,22 @@ workflow commonVariantFilter {
                     sourceBed=bed_file,
                     sourceBim=bim_file,
                     sourceFam=fam_file,
-                    keepFile=sampleFile, 
                     outputPrefix="common_variant_filter", 
                     maf=maf, 
                     chromosome=chromosome, 
                     docker=docker,
             }
-
-            call plink_filter.PlinkVarMissingnessFilter as PlinkMissingness {
-                input:
-                    sourceBed=FrequencyFiltered.freq_filtered_bed,
-                    sourceBim=FrequencyFiltered.freq_filtered_bim,
-                    sourceFam=FrequencyFiltered.freq_filtered_fam,
-                    varMissingness=0.1,
-                    chromosome=chromosome,
-                    docker=docker
-            }
         } 
+
+        call plink_filter.PlinkVarMissingnessFilter as PlinkMissingness {
+            input:
+                sourceBed=select_first([FilteredSubset.subset_bed,FrequencyFiltered.freq_filtered_bed]),
+                sourceBim=select_first([FilteredSubset.subset_bim,FrequencyFiltered.freq_filtered_bim]),
+                sourceFam=select_first([FilteredSubset.subset_fam,FrequencyFiltered.freq_filtered_fam]),
+                varMissingness=0.1,
+                chromosome=chromosome,
+                docker=docker
+        }
     } 
 
     call merge_plink_files.MergePlinkFiles as MergePlinkFiles { 
