@@ -16,6 +16,8 @@ task MoveOrCopyFourFiles {
         String target_gcp_folder
     }
 
+    Int disk_size = ceil((size(source_file1, "GB") + size(source_file2, "GB") + size(source_file3, "GB")) + size(source_file4, "GB")  * 3) + 10
+
     String action = if (is_move_file) then "mv" else "cp"
 
     String gcs_output_dir = sub(target_gcp_folder, "/+$", "")
@@ -24,6 +26,8 @@ task MoveOrCopyFourFiles {
     String new_file2 = "~{gcs_output_dir}/~{basename(source_file2)}"
     String new_file3 = "~{gcs_output_dir}/~{basename(source_file3)}"
     String new_file4 = "~{gcs_output_dir}/~{basename(source_file4)}"
+
+    
 
     command <<<
 
@@ -35,7 +39,7 @@ task MoveOrCopyFourFiles {
 
     runtime {
         docker: "google/cloud-sdk"
-        disks: "local-disk 10 SSD"
+        disks: "local-disk " + disk_size + " SSD"
         memory: memory + "GiB"
     }
     output {

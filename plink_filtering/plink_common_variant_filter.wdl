@@ -14,6 +14,7 @@ workflow commonVariantFilter {
         String plinkOutputPrefix = "test"
         # The goal with this workflow is to filter down the variants to a more manageable size. This will be done with a MAF filter
         Float maf
+        Float variant_missingness = 0.1
         # We can just use the standard plink docker image for most things in this workflow
         String docker = "hkim298/plink_1.9_2.0:20230116_20230707"
         # We are also going to subset the file to a smaller number of individuals (n=5,000). This sampling will help with runtime memory
@@ -66,7 +67,7 @@ workflow commonVariantFilter {
                 sourceBed=select_first([FilteredSubset.subset_bed,FrequencyFiltered.freq_filtered_bed]),
                 sourceBim=select_first([FilteredSubset.subset_bim,FrequencyFiltered.freq_filtered_bim]),
                 sourceFam=select_first([FilteredSubset.subset_fam,FrequencyFiltered.freq_filtered_fam]),
-                varMissingness=0.1,
+                varMissingness=variant_missingness,
                 chromosome=chromosome,
                 docker=docker
         }
