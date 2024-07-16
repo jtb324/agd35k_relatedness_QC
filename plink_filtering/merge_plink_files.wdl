@@ -39,7 +39,7 @@ task MergePlinkFiles {
     runtime {
         docker: docker
         preemptible: 0
-        disks: "local-disk " + disk_size + " HDD"
+        disks: "local-disk " + disk_size + " SSD"
         memory: memory_gb + " GiB"
     }
 

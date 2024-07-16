@@ -1,5 +1,9 @@
 version 1.0
 
+import "https://raw.githubusercontent.com/jtb324/agd35k_relatedness_QC/main/plink_filtering/merge_plink_files.wdl" as merge_plink_files
+import "https://raw.githubusercontent.com/jtb324/agd35k_relatedness_QC/main/plink_filtering/filter_plink_files.wdl" as plink_filter
+import "https://raw.githubusercontent.com/jtb324/agd35k_relatedness_QC/main/utilities/file_handling.wdl" as file_utilities
+
 workflow commonVariantFilter {
     input {
         # We first need to provide arrays of the bed/bim/fam files since we are using plink1.9 formatted files
@@ -30,28 +34,65 @@ workflow commonVariantFilter {
         File bim_file = source_bim_files[indx]
         File fam_file = source_fam_files[indx]
 
-        if (defined()) {
+        if (defined(sample_file)) {
+            call plink_filter.PlinkFilterandSubset as FilteredSubset {
+                input: 
+                    sourceBed=bed_file,
+                    sourceBim=bim_file,
+                    sourceFam=fam_file,
+                    keepFile=sampleFile, 
+                    outputPrefix="common_variant_filter", 
+                    maf=maf, 
+                    chromosome=chromosome, 
+                    docker=docker,
+            }
 
-        }
-        if 
-        call PlinkFilter {
-            input: 
-            sourceBed=bed_file,
-            sourceBim=bim_file,
-            sourceFam=fam_file,
-            keepFile=sampleFile, 
-            outputPrefix="common_variant_filter", 
-            maf=maf, 
-            chromosome=chromosome, 
-            docker=docker,
+            call plink_filter.PlinkVarMissingnessFilter as PlinkMissingness {
+                input:
+                    sourceBed=FilteredSubset.outputBed,
+                    sourceBim=FilteredSubset.outputBim,
+                    sourceFam=FilteredSubset.outputFam,
+                    varMissingness=0.1,
+                    chromosome=chromosome,
+                    docker=docker
+            }
         }
 
+        if (!defined(sample_file)){
+            call plink_filter.PlinkFrequencyFilter as FrequencyFiltered {
+                input: 
+                    sourceBed=bed_file,
+                    sourceBim=bim_file,
+                    sourceFam=fam_file,
+                    keepFile=sampleFile, 
+                    outputPrefix="common_variant_filter", 
+                    maf=maf, 
+                    chromosome=chromosome, 
+                    docker=docker,
+            }
+
+            call plink_filter.PlinkVarMissingnessFilter as PlinkMissingness {
+                input:
+                    sourceBed=FrequencyFiltered.outputBed,
+                    sourceBim=FrequencyFiltered.outputBim,
+                    sourceFam=FrequencyFiltered.outputFam,
+                    varMissingness=0.1,
+                    chromosome=chromosome,
+                    docker=docker
+            }
+        } 
     } 
 
-    call MergePlinkFiles { input: bed_files=PlinkFilter.output_bed, bim_files=PlinkFilter.output_bim, fam_files=PlinkFilter.output_fam, target_prefix=plinkOutputPrefix}
+    call merge_plink_files.MergePlinkFiles as MergePlinkFiles { 
+        input: 
+        bed_files=PlinkMissingness.output_bed, 
+        bim_files=PlinkMissingness.output_bim, 
+        fam_files=PlinkMissingness.output_fam, 
+        target_prefix=plinkOutputPrefix
+        }
 
     if(defined(target_gcp_folder)){
-        call MoveOrCopyFourFiles {
+        call file_utilities.MoveOrCopyFourFiles {
             input:
                 source_file1 = MergePlinkFiles.output_merged_bed,
                 source_file2 = MergePlinkFiles.output_merged_bim,
