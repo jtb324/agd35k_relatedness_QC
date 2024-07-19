@@ -16,7 +16,7 @@ task MoveOrCopyFourFiles {
         String target_gcp_folder
     }
 
-    Int disk_size = ceil((size(source_file1, "GB") + size(source_file2, "GB") + size(source_file3, "GB")) + size(source_file4, "GB")  * 3) + 10
+    Int disk_size = ceil(size(source_file1, "GB") + size(source_file2, "GB") + size(source_file3, "GB") + size(source_file4, "GB")) + 5
 
     String action = if (is_move_file) then "mv" else "cp"
 
@@ -47,5 +47,45 @@ task MoveOrCopyFourFiles {
         String output_file2 = new_file2
         String output_file3 = new_file3
         String output_file4 = new_file4
+    }
+}
+
+task MoveOrCopyTwoFiles {
+    input {
+        File source_file1
+        File source_file2
+
+        Boolean is_move_file = false
+
+        String? project_id
+        String target_gcp_folder
+        Int memory = 2
+    }
+    # dynamically determine disk size
+    Int disk_size = ceil(size(source_file1, "TB") + size(source_file2, "TB")) + 5
+
+    String action = if (is_move_file) then "mv" else "cp"
+
+    String gcs_output_dir = sub(target_gcp_folder, "/+$", "")
+
+    String new_file1 = "~{gcs_output_dir}/~{basename(source_file1)}"
+    String new_file2 = "~{gcs_output_dir}/~{basename(source_file2)}"
+
+    command <<<
+
+    set -e
+
+    gsutil -m ~{"-u " + project_id} ~{action} ~{source_file1} ~{source_file2} ~{gcs_output_dir}/
+
+    >>>
+
+    runtime {
+        docker: "google/cloud-sdk"
+        disks: "local-disk " + disk_size + " SSD"
+        memory: memory + "GiB"
+    }
+    output {
+        String output_file1 = new_file1
+        String output_file2 = new_file2
     }
 }
