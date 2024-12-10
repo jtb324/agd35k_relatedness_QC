@@ -80,7 +80,7 @@ task MergePlink2Files {
 
     paste pgen.list psam.list pvar.list > merge.list
 
-    plink2 --pmerge-list merge.list --make-bed --out ~{target_prefix} --delete-pmerge-result
+    plink2 --pmerge-list merge.list --make-pgen --out ~{target_prefix} --delete-pmerge-result
 
     >>>
 
