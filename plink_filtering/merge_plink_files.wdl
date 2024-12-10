@@ -50,3 +50,51 @@ task MergePlinkFiles {
         File output_merged_log = merged_log
     }
 }
+
+task MergePlink2Files {
+    input {
+        Array[File] pgen_files
+        Array[File] pvar_files
+        Array[File] psam_files
+
+        String target_prefix
+
+        Int memory_gb = 20
+
+        String docker = "hkim298/plink_1.9_2.0:20230116_20230707"
+    }
+
+    Int disk_size = ceil((size(pgen_files, "GB") + size(pvar_files, "GB") + size(psam_files, "GB"))  * 3) + 20
+
+
+    String merged_pgen = target_prefix + ".pgen"
+    String merged_psam = target_prefix + ".psam"
+    String merged_pvar = target_prefix + ".pvar"
+    String merged_log = target_prefix + ".log"
+
+    command <<<
+
+    cat ~{write_lines(pgen_files)} > pgen.list
+    cat ~{write_lines(psam_files)} > psam.list
+    cat ~{write_lines(pvar_files)} > pvar.list
+
+    paste pgen.list psam.list pvar.list > merge.list
+
+    plink2 --pmerge-list merge.list --make-bed --out ~{target_prefix} --delete-pmerge-result
+
+    >>>
+
+    runtime {
+        docker: docker
+        preemptible: 0
+        disks: "local-disk " + disk_size + " SSD"
+        memory: memory_gb + " GiB"
+    }
+
+    output {
+        File output_merged_pgen = merged_pgen
+        File output_merged_psam = merged_psam
+        File output_merged_var = merged_pvar
+        File output_merged_log = merged_log
+    }
+}
