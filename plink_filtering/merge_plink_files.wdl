@@ -94,7 +94,7 @@ task MergePlink2Files {
     output {
         File output_merged_pgen = merged_pgen
         File output_merged_psam = merged_psam
-        File output_merged_var = merged_pvar
+        File output_merged_pvar = merged_pvar
         File output_merged_log = merged_log
     }
 }
