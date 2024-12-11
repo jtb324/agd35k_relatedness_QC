@@ -77,8 +77,8 @@ task MergePlink2Files {
     
 
     cat ~{write_lines(pgen_files)} > pgen.list
-    echo "this is the list of files"
-    cat pgen.list
+    echo "this is the len of the list of files"
+    echo ~{length(pgen_files)}
 
     cat ~{write_lines(psam_files)} > psam.list
     cat ~{write_lines(pvar_files)} > pvar.list
