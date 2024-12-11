@@ -74,7 +74,12 @@ task MergePlink2Files {
 
     command <<<
 
+    
+
     cat ~{write_lines(pgen_files)} > pgen.list
+
+    cat pgen.list
+    
     cat ~{write_lines(psam_files)} > psam.list
     cat ~{write_lines(pvar_files)} > pvar.list
 
