@@ -74,18 +74,13 @@ task MergePlink2Files {
 
     command <<<
 
-    
-
     cat ~{write_lines(pgen_files)} > pgen.list
-    echo "this is the len of the list of files"
-    echo ~{length(pgen_files)}
-
     cat ~{write_lines(psam_files)} > psam.list
     cat ~{write_lines(pvar_files)} > pvar.list
 
     paste pgen.list psam.list pvar.list > merge.list
 
-    plink2 --pmerge-list merge.list --make-pgen --out ~{target_prefix} --delete-pmerge-result
+    plink2 --pmerge-list merge.list --make-pgen --out ~{target_prefix}
 
     >>>
 
