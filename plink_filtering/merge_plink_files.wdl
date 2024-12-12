@@ -78,7 +78,7 @@ task MergePlink2Files {
     cat ~{write_lines(psam_files)} > psam.list
     cat ~{write_lines(pvar_files)} > pvar.list
 
-    paste pgen.list psam.list pvar.list > merge.list
+    paste pgen.list pvar.list psam.list > merge.list
 
     plink2 --pmerge-list merge.list --make-pgen --out ~{target_prefix}
 
